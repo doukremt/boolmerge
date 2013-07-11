@@ -24,7 +24,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /* --------------- Common stuff -------------- */
 
-
 typedef struct {
     PyObject_HEAD
     PyObject *it1, *it2, *elt1, *elt2;
@@ -191,7 +190,10 @@ Return an iterator yielding all elements that are common\n\
 to the two sorted iterables `it1` and `it2`:\n\
 \n\
     >>> list(boolmerge.andmerge(\"acd\", \"abc\"))\n\
-    ['a', 'c']");
+    ['a', 'c']\n\
+\n\
+Note that the iteration will be faster if you pass\n\
+the shortest iterable as first argument");
 
 
 static PyObject * andmerge_new(PyTypeObject *type, PyObject *args, PyObject *kwargs)
@@ -320,7 +322,7 @@ static PyObject * notmerge_new(PyTypeObject *type, PyObject *args, PyObject *kwa
         return NULL;
     }
     
-    MergeWithoutCacheState *state = (MergeWithoutCacheState *)type->tp_alloc(type, 0);
+    MergeWithCacheState *state = (MergeWithCacheState *)type->tp_alloc(type, 0);
     if (state == NULL) {
         Py_DECREF(it1);
         Py_DECREF(it2);
@@ -329,34 +331,33 @@ static PyObject * notmerge_new(PyTypeObject *type, PyObject *args, PyObject *kwa
     
     state->it1 = it1;
     state->it2 = it2;
-        
+    state->elt1 = PyIter_Next(it1);
+    state->elt2 = PyIter_Next(it2);
+    
     return (PyObject *)state;
 }
 
 
-static PyObject * notmerge_next(MergeWithoutCacheState *state)
+static PyObject * notmerge_next(MergeWithCacheState *state)
 {
-    PyObject *elt1, *elt2, *step = NULL;
+    PyObject *step = NULL;
     
-    elt1 = PyIter_Next(state->it1);
-    elt2 = PyIter_Next(state->it2);
-    
-    while (elt1 != NULL) {
-        if (elt2 == NULL || (PyObject_RichCompareBool(elt1, elt2, Py_LT) == 1)) {
-            step = Py_BuildValue("O", elt1);
-            Py_DECREF(elt1);
-            elt1 = PyIter_Next(state->it1);
+    while (state->elt1 != NULL) {
+        if (state->elt2 == NULL || PyObject_RichCompareBool(state->elt1, state->elt2, Py_LT) == 1) {
+            step = Py_BuildValue("O", state->elt1);
+            Py_DECREF(state->elt1);
+            state->elt1 = PyIter_Next(state->it1);
             break;
         }
-        else if (PyObject_RichCompareBool(elt1, elt2, Py_EQ) == 1) {
-            Py_DECREF(elt1);
-            Py_DECREF(elt2);
-            elt1 = PyIter_Next(state->it1);
-            elt2 = PyIter_Next(state->it2);
+        else if (PyObject_RichCompareBool(state->elt1, state->elt2, Py_EQ) == 1) {
+            Py_DECREF(state->elt1);
+            Py_DECREF(state->elt2);
+            state->elt1 = PyIter_Next(state->it1);
+            state->elt2 = PyIter_Next(state->it2);
         }
         else {
-            Py_DECREF(elt2);
-            elt2 = PyIter_Next(state->it2);
+            Py_DECREF(state->elt2);
+            state->elt2 = PyIter_Next(state->it2);
         }
     }
 
@@ -367,9 +368,9 @@ static PyObject * notmerge_next(MergeWithoutCacheState *state)
 PyTypeObject NotMerge_Type = {
     PyVarObject_HEAD_INIT(&PyType_Type, 0)
     "boolmerge.notmerge",        /* tp_name */
-    sizeof(MergeWithoutCacheState),             /* tp_basicsize */
+    sizeof(MergeWithCacheState),             /* tp_basicsize */
     0,                              /* tp_itemsize */
-    (destructor)mergewithoutcache_dealloc,      /* tp_dealloc */
+    (destructor)mergewithcache_dealloc,      /* tp_dealloc */
     0,                              /* tp_print */
     0,                              /* tp_getattr */
     0,                              /* tp_setattr */
