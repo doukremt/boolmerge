@@ -24,6 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /* --------------- Common stuff -------------- */
 
+
 typedef struct {
     PyObject_HEAD
     PyObject *it1, *it2, *elt1, *elt2;
@@ -190,10 +191,7 @@ Return an iterator yielding all elements that are common\n\
 to the two sorted iterables `it1` and `it2`:\n\
 \n\
     >>> list(boolmerge.andmerge(\"acd\", \"abc\"))\n\
-    ['a', 'c']\n\
-\n\
-Note that the iteration will be faster if you pass\n\
-the shortest iterable as first argument");
+    ['a', 'c']");
 
 
 static PyObject * andmerge_new(PyTypeObject *type, PyObject *args, PyObject *kwargs)

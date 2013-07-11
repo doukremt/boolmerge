@@ -29,9 +29,6 @@ present in both of the iterators it is given as arguments:
     >>> list(boolmerge.andmerge("acd", "abc"))
     ['a', 'c']
 
-Note that the iteration will be faster if you pass the shortest
-iterable as first argument.
-
 ``boolmerge.ormerge`` returns an iterator which yields all items
 present in any of the iterators it is given as arguments:
 
