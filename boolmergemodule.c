@@ -232,11 +232,11 @@ static PyObject * andmerge_next(MergeWithoutCacheState *state)
     elt2 = PyIter_Next(state->it2);
     
     while (elt1 != NULL && elt2 != NULL) {
-        if (elt1 == NULL || PyObject_RichCompareBool(elt1, elt2, Py_GT) == 1) {
+        if (PyObject_RichCompareBool(elt1, elt2, Py_GT) == 1) {
             Py_DECREF(elt2);
             elt2 = PyIter_Next(state->it2);
         }
-        else if (elt2 == NULL || PyObject_RichCompareBool(elt1, elt2, Py_LT) == 1) {
+        else if (PyObject_RichCompareBool(elt1, elt2, Py_LT) == 1) {
             Py_DECREF(elt1);
             elt1 = PyIter_Next(state->it1);
         }
