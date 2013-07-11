@@ -32,11 +32,11 @@ typedef struct {
 
 static void mergewithcache_dealloc(MergeWithCacheState *state)
 {
-	Py_XDECREF(state->it1);
-	Py_XDECREF(state->it2);
-	Py_XDECREF(state->elt1);
-	Py_XDECREF(state->elt2);
-	Py_TYPE(state)->tp_free(state);
+    Py_XDECREF(state->it1);
+    Py_XDECREF(state->it2);
+    Py_XDECREF(state->elt1);
+    Py_XDECREF(state->elt2);
+    Py_TYPE(state)->tp_free(state);
 }
 
 
@@ -48,9 +48,9 @@ typedef struct {
 
 static void mergewithoutcache_dealloc(MergeWithoutCacheState *state)
 {
-	Py_XDECREF(state->it1);
-	Py_XDECREF(state->it2);
-	Py_TYPE(state)->tp_free(state);
+    Py_XDECREF(state->it1);
+    Py_XDECREF(state->it2);
+    Py_TYPE(state)->tp_free(state);
 }
 
 
@@ -70,70 +70,70 @@ of the sorted iterables `it1` and `it2`:\n\
 
 static PyObject * ormerge_new(PyTypeObject *type, PyObject *args, PyObject *kwargs)
 {
-	PyObject *arg1, *arg2, *it1, *it2;
+    PyObject *arg1, *arg2, *it1, *it2;
 
-	if (!PyArg_UnpackTuple(args, "ormerge", 2, 2, &arg1, &arg2))
-		return NULL;
-	
-	if ((it1 = PyObject_GetIter(arg1)) == NULL)
-		return NULL;
-	if ((it2 = PyObject_GetIter(arg2)) == NULL) {
-		Py_DECREF(it1);
-		return NULL;
-	}
-	
-	MergeWithCacheState *state = (MergeWithCacheState *)type->tp_alloc(type, 0);
-	if (state == NULL) {
-		Py_DECREF(it1);
-		Py_DECREF(it2);
-		return NULL;
-	}
-		
-	state->it1 = it1;
-	state->it2 = it2;
-	state->elt1 = PyIter_Next(it1);
-	state->elt2 = PyIter_Next(it2);
-		
-	return (PyObject *)state;
+    if (!PyArg_UnpackTuple(args, "ormerge", 2, 2, &arg1, &arg2))
+        return NULL;
+    
+    if ((it1 = PyObject_GetIter(arg1)) == NULL)
+        return NULL;
+    if ((it2 = PyObject_GetIter(arg2)) == NULL) {
+        Py_DECREF(it1);
+        return NULL;
+    }
+    
+    MergeWithCacheState *state = (MergeWithCacheState *)type->tp_alloc(type, 0);
+    if (state == NULL) {
+        Py_DECREF(it1);
+        Py_DECREF(it2);
+        return NULL;
+    }
+        
+    state->it1 = it1;
+    state->it2 = it2;
+    state->elt1 = PyIter_Next(it1);
+    state->elt2 = PyIter_Next(it2);
+        
+    return (PyObject *)state;
 }
 
 
 static PyObject * ormerge_next(MergeWithCacheState *state)
 {
-	PyObject *step = NULL;
-	
-	if (state->elt1 == NULL && state->elt2 == NULL) {
-		return step;
-	}
-	else if (state->elt1 == NULL) {
-		step = Py_BuildValue("O", state->elt2);
-		Py_DECREF(state->elt2);
-		state->elt2 = PyIter_Next(state->it2);
-	}
-	else if (state->elt2 == NULL) {
-		step = Py_BuildValue("O", state->elt1);
-		Py_DECREF(state->elt1);
-		state->elt1 = PyIter_Next(state->it1);
-	}
-	else if (PyObject_RichCompareBool(state->elt1, state->elt2, Py_LT) == 1) {
-		step = Py_BuildValue("O", state->elt1);
-		Py_DECREF(state->elt1);
-		state->elt1 = PyIter_Next(state->it1);
-	}
-	else if (PyObject_RichCompareBool(state->elt1, state->elt2, Py_GT) == 1) {
-		step = Py_BuildValue("O", state->elt2);
-		Py_DECREF(state->elt2);
-		state->elt2 = PyIter_Next(state->it2);
-	}
-	else {
-		/* assume elt1 and elt2 are equal */
-		step = Py_BuildValue("O", state->elt1);
-		Py_DECREF(state->elt1);
-		Py_DECREF(state->elt2);
-		state->elt1 = PyIter_Next(state->it1);
-		state->elt2 = PyIter_Next(state->it2);
-	}
-	return step;
+    PyObject *step = NULL;
+    
+    if (state->elt1 == NULL && state->elt2 == NULL) {
+        return step;
+    }
+    else if (state->elt1 == NULL) {
+        step = Py_BuildValue("O", state->elt2);
+        Py_DECREF(state->elt2);
+        state->elt2 = PyIter_Next(state->it2);
+    }
+    else if (state->elt2 == NULL) {
+        step = Py_BuildValue("O", state->elt1);
+        Py_DECREF(state->elt1);
+        state->elt1 = PyIter_Next(state->it1);
+    }
+    else if (PyObject_RichCompareBool(state->elt1, state->elt2, Py_LT) == 1) {
+        step = Py_BuildValue("O", state->elt1);
+        Py_DECREF(state->elt1);
+        state->elt1 = PyIter_Next(state->it1);
+    }
+    else if (PyObject_RichCompareBool(state->elt1, state->elt2, Py_GT) == 1) {
+        step = Py_BuildValue("O", state->elt2);
+        Py_DECREF(state->elt2);
+        state->elt2 = PyIter_Next(state->it2);
+    }
+    else {
+        /* assume elt1 and elt2 are equal */
+        step = Py_BuildValue("O", state->elt1);
+        Py_DECREF(state->elt1);
+        Py_DECREF(state->elt2);
+        state->elt1 = PyIter_Next(state->it1);
+        state->elt2 = PyIter_Next(state->it2);
+    }
+    return step;
 }
 
 
@@ -198,57 +198,57 @@ the shortest iterable as first argument");
 
 static PyObject * andmerge_new(PyTypeObject *type, PyObject *args, PyObject *kwargs)
 {
-	PyObject *arg1, *arg2, *it1, *it2;
+    PyObject *arg1, *arg2, *it1, *it2;
 
-	if (!PyArg_UnpackTuple(args, "andmerge", 2, 2, &arg1, &arg2))
-		return NULL;
-	
-	if ((it1 = PyObject_GetIter(arg1)) == NULL)
-		return NULL;
-	if ((it2 = PyObject_GetIter(arg2)) == NULL) {
-		Py_DECREF(it1);
-		return NULL;
-	}
-	
-	MergeWithoutCacheState *state = (MergeWithoutCacheState *)type->tp_alloc(type, 0);
-	if (state == NULL) {
-		Py_DECREF(it1);
-		Py_DECREF(it2);
-		return NULL;
-	}
-	
-	state->it1 = it1;
-	state->it2 = it2;
-		
-	return (PyObject *)state;
+    if (!PyArg_UnpackTuple(args, "andmerge", 2, 2, &arg1, &arg2))
+        return NULL;
+    
+    if ((it1 = PyObject_GetIter(arg1)) == NULL)
+        return NULL;
+    if ((it2 = PyObject_GetIter(arg2)) == NULL) {
+        Py_DECREF(it1);
+        return NULL;
+    }
+    
+    MergeWithoutCacheState *state = (MergeWithoutCacheState *)type->tp_alloc(type, 0);
+    if (state == NULL) {
+        Py_DECREF(it1);
+        Py_DECREF(it2);
+        return NULL;
+    }
+    
+    state->it1 = it1;
+    state->it2 = it2;
+        
+    return (PyObject *)state;
 }
 
 
 static PyObject * andmerge_next(MergeWithoutCacheState *state)
 {
-	PyObject *elt1, *elt2, *step = NULL;
-	
-	elt1 = PyIter_Next(state->it1);
-	elt2 = PyIter_Next(state->it2);
-	
-	while (elt1 != NULL && elt2 != NULL) {
-		if (elt1 == NULL || PyObject_RichCompareBool(elt1, elt2, Py_GT) == 1) {
-			Py_DECREF(elt2);
-			elt2 = PyIter_Next(state->it2);
-		}
-		else if (elt2 == NULL || PyObject_RichCompareBool(elt1, elt2, Py_LT) == 1) {
-			Py_DECREF(elt1);
-			elt1 = PyIter_Next(state->it1);
-		}
-		else {
-			step = Py_BuildValue("O", elt1);
-			break;
-		}
-	}
-	Py_XDECREF(elt1);
-	Py_XDECREF(elt2);
+    PyObject *elt1, *elt2, *step = NULL;
+    
+    elt1 = PyIter_Next(state->it1);
+    elt2 = PyIter_Next(state->it2);
+    
+    while (elt1 != NULL && elt2 != NULL) {
+        if (elt1 == NULL || PyObject_RichCompareBool(elt1, elt2, Py_GT) == 1) {
+            Py_DECREF(elt2);
+            elt2 = PyIter_Next(state->it2);
+        }
+        else if (elt2 == NULL || PyObject_RichCompareBool(elt1, elt2, Py_LT) == 1) {
+            Py_DECREF(elt1);
+            elt1 = PyIter_Next(state->it1);
+        }
+        else {
+            step = Py_BuildValue("O", elt1);
+            break;
+        }
+    }
+    Py_XDECREF(elt1);
+    Py_XDECREF(elt2);
 
-	return step;
+    return step;
 }
 
 
@@ -310,59 +310,59 @@ iterator that yield all elements present in `it1`, but not in `it2`:\n\
 
 static PyObject * notmerge_new(PyTypeObject *type, PyObject *args, PyObject *kwargs)
 {
-	PyObject *arg1, *arg2, *it1, *it2;
+    PyObject *arg1, *arg2, *it1, *it2;
 
-	if (!PyArg_UnpackTuple(args, "notmerge", 2, 2, &arg1, &arg2))
-		return NULL;
-	
-	if ((it1 = PyObject_GetIter(arg1)) == NULL)
-		return NULL;
-	if ((it2 = PyObject_GetIter(arg2)) == NULL) {
-		Py_DECREF(it1);
-		return NULL;
-	}
-	
-	MergeWithoutCacheState *state = (MergeWithoutCacheState *)type->tp_alloc(type, 0);
-	if (state == NULL) {
-		Py_DECREF(it1);
-		Py_DECREF(it2);
-		return NULL;
-	}
-	
-	state->it1 = it1;
-	state->it2 = it2;
-		
-	return (PyObject *)state;
+    if (!PyArg_UnpackTuple(args, "notmerge", 2, 2, &arg1, &arg2))
+        return NULL;
+    
+    if ((it1 = PyObject_GetIter(arg1)) == NULL)
+        return NULL;
+    if ((it2 = PyObject_GetIter(arg2)) == NULL) {
+        Py_DECREF(it1);
+        return NULL;
+    }
+    
+    MergeWithoutCacheState *state = (MergeWithoutCacheState *)type->tp_alloc(type, 0);
+    if (state == NULL) {
+        Py_DECREF(it1);
+        Py_DECREF(it2);
+        return NULL;
+    }
+    
+    state->it1 = it1;
+    state->it2 = it2;
+        
+    return (PyObject *)state;
 }
 
 
 static PyObject * notmerge_next(MergeWithoutCacheState *state)
 {
-	PyObject *elt1, *elt2, *step = NULL;
-	
-	elt1 = PyIter_Next(state->it1);
-	elt2 = PyIter_Next(state->it2);
-	
-	while (elt1 != NULL) {
-		if (elt2 == NULL || (PyObject_RichCompareBool(elt1, elt2, Py_LT) == 1)) {
-			step = Py_BuildValue("O", elt1);
-			Py_DECREF(elt1);
-			elt1 = PyIter_Next(state->it1);
-			break;
-		}
-		else if (PyObject_RichCompareBool(elt1, elt2, Py_EQ) == 1) {
-			Py_DECREF(elt1);
-			Py_DECREF(elt2);
-			elt1 = PyIter_Next(state->it1);
-			elt2 = PyIter_Next(state->it2);
-		}
-		else {
-			Py_DECREF(elt2);
-			elt2 = PyIter_Next(state->it2);
-		}
-	}
+    PyObject *elt1, *elt2, *step = NULL;
+    
+    elt1 = PyIter_Next(state->it1);
+    elt2 = PyIter_Next(state->it2);
+    
+    while (elt1 != NULL) {
+        if (elt2 == NULL || (PyObject_RichCompareBool(elt1, elt2, Py_LT) == 1)) {
+            step = Py_BuildValue("O", elt1);
+            Py_DECREF(elt1);
+            elt1 = PyIter_Next(state->it1);
+            break;
+        }
+        else if (PyObject_RichCompareBool(elt1, elt2, Py_EQ) == 1) {
+            Py_DECREF(elt1);
+            Py_DECREF(elt2);
+            elt1 = PyIter_Next(state->it1);
+            elt2 = PyIter_Next(state->it2);
+        }
+        else {
+            Py_DECREF(elt2);
+            elt2 = PyIter_Next(state->it2);
+        }
+    }
 
-	return step;
+    return step;
 }
 
 
@@ -424,73 +424,73 @@ of the two sorted iterables `it1` or `it2`, but not in both:\n\
 
 static PyObject * xormerge_new(PyTypeObject *type, PyObject *args, PyObject *kwargs)
 {
-	PyObject *arg1, *arg2, *it1, *it2;
+    PyObject *arg1, *arg2, *it1, *it2;
 
-	if (!PyArg_UnpackTuple(args, "xormerge", 2, 2, &arg1, &arg2))
-		return NULL;
-	
-	if ((it1 = PyObject_GetIter(arg1)) == NULL)
-		return NULL;
-	if ((it2 = PyObject_GetIter(arg2)) == NULL) {
-		Py_DECREF(it1);
-		return NULL;
-	}
-	
-	MergeWithCacheState *state = (MergeWithCacheState *)type->tp_alloc(type, 0);
-	if (state == NULL) {
-		Py_DECREF(it1);
-		Py_DECREF(it2);
-		return NULL;
-	}
-	
-	state->it1 = it1;
-	state->it2 = it2;
-	state->elt1 = PyIter_Next(it1);
-	state->elt2 = PyIter_Next(it2);
-		
-	return (PyObject *)state;
+    if (!PyArg_UnpackTuple(args, "xormerge", 2, 2, &arg1, &arg2))
+        return NULL;
+    
+    if ((it1 = PyObject_GetIter(arg1)) == NULL)
+        return NULL;
+    if ((it2 = PyObject_GetIter(arg2)) == NULL) {
+        Py_DECREF(it1);
+        return NULL;
+    }
+    
+    MergeWithCacheState *state = (MergeWithCacheState *)type->tp_alloc(type, 0);
+    if (state == NULL) {
+        Py_DECREF(it1);
+        Py_DECREF(it2);
+        return NULL;
+    }
+    
+    state->it1 = it1;
+    state->it2 = it2;
+    state->elt1 = PyIter_Next(it1);
+    state->elt2 = PyIter_Next(it2);
+        
+    return (PyObject *)state;
 }
 
 
 static PyObject * xormerge_next(MergeWithCacheState *state)
 {
-	PyObject *step = NULL;
-	
-	while (state->elt1 != NULL || state->elt2 != NULL) {
-		if (state->elt1 == NULL) {
-			step = Py_BuildValue("O", state->elt2);
-			Py_DECREF(state->elt2);
-			state->elt2 = PyIter_Next(state->it2);
-			break;
-		}
-		else if (state->elt2 == NULL) {
-			step = Py_BuildValue("O", state->elt1);
-			Py_DECREF(state->elt1);
-			state->elt1 = PyIter_Next(state->it1);
-			break;
-		}
-		else if (PyObject_RichCompareBool(state->elt1, state->elt2, Py_LT) == 1) {
-			step = Py_BuildValue("O", state->elt1);
-			Py_DECREF(state->elt1);
-			state->elt1 = PyIter_Next(state->it1);
-			break;
-		}
-		else if (PyObject_RichCompareBool(state->elt1, state->elt2, Py_GT) == 1) {
-			step = Py_BuildValue("O", state->elt2);
-			Py_DECREF(state->elt2);
-			state->elt2 = PyIter_Next(state->it2);
-			break;
-		}
-		else {
-			/* theoretically, elt1 == elt2 */
-			Py_DECREF(state->elt1);
-			Py_DECREF(state->elt2);
-			state->elt1 = PyIter_Next(state->it1);
-			state->elt2 = PyIter_Next(state->it2);
-		}
-	}
+    PyObject *step = NULL;
+    
+    while (state->elt1 != NULL || state->elt2 != NULL) {
+        if (state->elt1 == NULL) {
+            step = Py_BuildValue("O", state->elt2);
+            Py_DECREF(state->elt2);
+            state->elt2 = PyIter_Next(state->it2);
+            break;
+        }
+        else if (state->elt2 == NULL) {
+            step = Py_BuildValue("O", state->elt1);
+            Py_DECREF(state->elt1);
+            state->elt1 = PyIter_Next(state->it1);
+            break;
+        }
+        else if (PyObject_RichCompareBool(state->elt1, state->elt2, Py_LT) == 1) {
+            step = Py_BuildValue("O", state->elt1);
+            Py_DECREF(state->elt1);
+            state->elt1 = PyIter_Next(state->it1);
+            break;
+        }
+        else if (PyObject_RichCompareBool(state->elt1, state->elt2, Py_GT) == 1) {
+            step = Py_BuildValue("O", state->elt2);
+            Py_DECREF(state->elt2);
+            state->elt2 = PyIter_Next(state->it2);
+            break;
+        }
+        else {
+            /* theoretically, elt1 == elt2 */
+            Py_DECREF(state->elt1);
+            Py_DECREF(state->elt2);
+            state->elt1 = PyIter_Next(state->it1);
+            state->elt2 = PyIter_Next(state->it2);
+        }
+    }
 
-	return step;
+    return step;
 }
 
 
@@ -555,34 +555,34 @@ If this is not the case, the result is undefined.\n\
 
 
 static struct PyModuleDef boolmergemodule = {
-	PyModuleDef_HEAD_INIT,
-	"boolmerge",              /* m_name */
-	module_doc,               /* m_doc */
-	-1,                       /* m_size */
+    PyModuleDef_HEAD_INIT,
+    "boolmerge",              /* m_name */
+    module_doc,               /* m_doc */
+    -1,                       /* m_size */
 };
 
 
 PyMODINIT_FUNC PyInit_boolmerge(void)
 {
-	PyObject *module = PyModule_Create(&boolmergemodule);
-	if (!module)
-		return NULL;
+    PyObject *module = PyModule_Create(&boolmergemodule);
+    if (!module)
+        return NULL;
 
-	if (PyType_Ready(&OrMerge_Type)  != 0 || \
-	    PyType_Ready(&AndMerge_Type) != 0 || \
-	    PyType_Ready(&NotMerge_Type) != 0 || \
-	    PyType_Ready(&XorMerge_Type) != 0)
-		return NULL;
-	
-	Py_INCREF((PyObject *)&OrMerge_Type);
-	Py_INCREF((PyObject *)&AndMerge_Type);
-	Py_INCREF((PyObject *)&NotMerge_Type);
-	Py_INCREF((PyObject *)&XorMerge_Type);
-	
-	PyModule_AddObject(module, "ormerge", (PyObject *)&OrMerge_Type);
-	PyModule_AddObject(module, "andmerge", (PyObject *)&AndMerge_Type);
-	PyModule_AddObject(module, "notmerge", (PyObject *)&NotMerge_Type);
-	PyModule_AddObject(module, "xormerge", (PyObject *)&XorMerge_Type);
+    if (PyType_Ready(&OrMerge_Type)  != 0 || \
+        PyType_Ready(&AndMerge_Type) != 0 || \
+        PyType_Ready(&NotMerge_Type) != 0 || \
+        PyType_Ready(&XorMerge_Type) != 0)
+        return NULL;
+    
+    Py_INCREF((PyObject *)&OrMerge_Type);
+    Py_INCREF((PyObject *)&AndMerge_Type);
+    Py_INCREF((PyObject *)&NotMerge_Type);
+    Py_INCREF((PyObject *)&XorMerge_Type);
+    
+    PyModule_AddObject(module, "ormerge", (PyObject *)&OrMerge_Type);
+    PyModule_AddObject(module, "andmerge", (PyObject *)&AndMerge_Type);
+    PyModule_AddObject(module, "notmerge", (PyObject *)&NotMerge_Type);
+    PyModule_AddObject(module, "xormerge", (PyObject *)&XorMerge_Type);
 
-	return module;
+    return module;
 }

@@ -19,26 +19,26 @@ from os.path import join, dirname, abspath
 from distutils.core import setup, Extension
 
 with open(join(dirname(abspath(__file__)), "README.rst")) as f:
-	long_description = f.read()
+    long_description = f.read()
 
 module = Extension('boolmerge', sources = ['boolmergemodule.c'])
 
 setup (
-	name = 'BoolMerge',
-	version = '1.0',
-	description = 'Tools for merging sorted iterables with boolean operators',
-	long_description = long_description,
-	author='Michaël Meyer',
-	author_email='michaelnm.meyer@gmail.com',
-	url='https://github.com/doukremt/boolmerge',
-	ext_modules = [module],
-	classifiers=(
-		'Intended Audience :: Developers',
-		'Natural Language :: English',
-		'License :: OSI Approved :: GNU General Public License (GPL)',
-		'Operating System :: OS Independent',
-		'Topic :: Software Development :: Libraries :: Python Modules',
-		'Programming Language :: C',
-		'Programming Language :: Python',
-	)
+    name = 'BoolMerge',
+    version = '1.0',
+    description = 'Tools for merging sorted iterables with boolean operators',
+    long_description = long_description,
+    author='Michaël Meyer',
+    author_email='michaelnm.meyer@gmail.com',
+    url='https://github.com/doukremt/boolmerge',
+    ext_modules = [module],
+    classifiers=(
+        'Intended Audience :: Developers',
+        'Natural Language :: English',
+        'License :: OSI Approved :: GNU General Public License (GPL)',
+        'Operating System :: OS Independent',
+        'Topic :: Software Development :: Libraries :: Python Modules',
+        'Programming Language :: C',
+        'Programming Language :: Python',
+    )
 )
